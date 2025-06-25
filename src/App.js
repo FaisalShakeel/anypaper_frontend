@@ -76,12 +76,21 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 // Separate component for routing logic
 const AppRoutes = () => {
+
   const navigate = useNavigate()
   const { user, loading,isLoggedOut } = useContext(AuthContext);
   const location = useLocation()
+
+  const getCookie = (name) => {
+  const value = `; ${document.cookie}`;
+  console.log("All Cookies",value)
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+  return undefined;
+};
   
   useEffect(()=>{
-  const token = Cookies.get("auth_token")
+  const token = getCookie("auth_token")
 
     console.log("Token",token)
   if(!token && (location.pathname!="/moderators/login" && location.pathname!="/" && location.pathname!="/writer/login")){
