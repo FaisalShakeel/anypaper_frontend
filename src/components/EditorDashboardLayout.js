@@ -106,8 +106,17 @@ const EditorDashboardLayout = ({ children }) => {
       // Simulate delay before closing the modal (for a better UX)
       setTimeout(() => {
         setOpenLogoutModel(false);
+        setUser(null)
         
-        window.location.href = "/"; // Redirect after logout
+           if (window.history.length > 1) {
+      window.history.go(-(window.history.length - 1));
+      setTimeout(() => {
+        window.history.replaceState(null, '', "/");
+        navigate("/", { replace: true });
+      }, 100);
+    } else {
+      navigate("/", { replace: true });
+    }
       }, 2000);
     } catch (error) {
       console.error("Logout failed", error.response?.data?.message);

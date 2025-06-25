@@ -1,5 +1,5 @@
 import { useContext, useEffect } from 'react';
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
 import { AuthContext } from './contexts/AuthContext';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
@@ -54,11 +54,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   const location = useLocation();
 
   if (loading) {
-    return (
-      
-       <CircularProgressLoading/>
-      
-    );
+    return <CircularProgressLoading />;
   }
 
   if (!user) {
@@ -76,35 +72,52 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
 // Separate component for routing logic
 const AppRoutes = () => {
+  console.log("History Record",window.history.length)
+  const { user, loading } = useContext(AuthContext);
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const navigate = useNavigate()
-  const { user, loading,isLoggedOut } = useContext(AuthContext);
-  const location = useLocation()
+  useEffect(() => {
+    const token = Cookies.get("auth_token");
 
-  const getCookie = (name) => {
-  const value = `; ${document.cookie}`;
-  console.log("All Cookies",value)
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(";").shift();
-  return undefined;
-};
-  
-  useEffect(()=>{
-  const token = getCookie("auth_token")
+    // Only redirect to login if not loading, no user is present,
+    // and the current path is not a public route
+    if (!loading && !user && !["/", "/login", "/moderators/login", "/writer/login", "/writer/create-account", "/codeofconduct", "/refundpolicy", "/termsandconditions"].includes(location.pathname)) {
+      navigate("/login", { state: { from: location } });
+    }
+  }, [user, loading, location.pathname, navigate]);
 
-    console.log("Token",token)
-  if(!token && (location.pathname!="/moderators/login" && location.pathname!="/" && location.pathname!="/writer/login")){
-    navigate("/login")
+  // Render Home immediately for root route, regardless of loading state
+  if (location.pathname === "/" && !user && loading) {
+    return (
+      <>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Home />} />
+        </Routes>
+      </>
+    );
   }
-    console.log("Is Logged Out",isLoggedOut)
-  },[isLoggedOut,location.pathname])
+
+  // Show loading for non-public routes while fetching user data
+  if (loading && !["/", "/login", "/moderators/login", "/writer/login", "/writer/create-account", "/codeofconduct", "/refundpolicy", "/termsandconditions"].includes(location.pathname)) {
+    return <CircularProgressLoading />;
+  }
 
   return (
     <>
       <ScrollToTop />
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={user?.role === 'Writer' ? <Navigate to="/writer/dashboard" /> :user?.role ==="Editor"?<Navigate to="/editor/dashboard"/>:<Home />} />
+        <Route
+          path="/"
+          element={
+            user?.role === 'Writer' ? <Navigate to="/writer/dashboard" /> :
+            user?.role === 'Editor' ? <Navigate to="/editor/dashboard" /> :
+            user?.role === 'Admin' ? <Navigate to="/admin/dashboard" /> :
+            <Home />
+          }
+        />
         <Route path="*" element={<NotFound />} />
         <Route path="/login" element={<SignInPage />} />
         <Route path="/moderators/login" element={<AdminEditorSignInPage />} />
@@ -173,35 +186,19 @@ const AppRoutes = () => {
         />
         <Route
           path="/student/placeorder/step/1"
-          element={
-            
-              <PlaceOrder />
-          
-          }
+          element={<PlaceOrder />}
         />
         <Route
           path="/student/placeorder/step/2"
-          element={
-            
-              <PlaceOrderStep2 />
-          
-          }
+          element={<PlaceOrderStep2 />}
         />
         <Route
           path="/student/placeorder/step/3"
-          element={
-            
-              <PlaceOrderStep3 />
-            
-          }
+          element={<PlaceOrderStep3 />}
         />
         <Route
           path="/student/placeorder/step/4"
-          element={
-            
-              <PlaceOrderStep4 />
-            
-          }
+          element={<PlaceOrderStep4 />}
         />
         <Route
           path="/student/my-files"
@@ -388,7 +385,7 @@ const AppRoutes = () => {
         <Route
           path="/admin/writer-profile/:id"
           element={
-            <ProtectedRoute allowedRoles={['Admin','Student']}>
+            <ProtectedRoute allowedRoles={['Admin', 'Student']}>
               <WriterProfilePage />
             </ProtectedRoute>
           }

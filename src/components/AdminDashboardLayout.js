@@ -44,7 +44,7 @@ const drawerWidth = 240;
 const collapsedWidth = 70;
 
 const AdminDashboardLayout = ({ children }) => {
-  const { user } = useContext(AuthContext);
+  const { user,setUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -123,7 +123,17 @@ const AdminDashboardLayout = ({ children }) => {
       // Simulate delay before closing the modal (for a better UX)
       setTimeout(() => {
         setOpenLogoutModel(false);
-        window.location.href = "/"; // Redirect after logout
+      setUser(null)
+
+           if (window.history.length > 1) {
+      window.history.go(-(window.history.length - 1));
+      setTimeout(() => {
+        window.history.replaceState(null, '', "/");
+        navigate("/", { replace: true });
+      }, 100);
+    } else {
+      navigate("/", { replace: true });
+    }
       }, 2000);
     } catch (error) {
       console.error("Logout failed", error.response?.data?.message);

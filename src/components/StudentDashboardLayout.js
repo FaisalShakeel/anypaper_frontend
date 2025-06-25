@@ -129,7 +129,17 @@ const StudentDashboardLayout = ({ children }) => {
         
         setOpenLogoutModel(false);
         setIsLoggedOut(true)
-         window.location.href = "/"
+        setUser(null)
+          if (window.history.length > 1) {
+      window.history.go(-(window.history.length - 1));
+      setTimeout(() => {
+        window.history.replaceState(null, '', "/");
+        navigate("/", { replace: true });
+      }, 100);
+    } else {
+      navigate("/", { replace: true });
+    }
+  
       }, 2000);
     } catch (error) {
       console.error("Logout failed", error.response?.data?.message);

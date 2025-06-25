@@ -1,15 +1,15 @@
 import React, { createContext, useState, useEffect } from "react";
-import axios from "axios"; // To make API requests
-import { CircularProgress,Box } from "@mui/material";
+import axios from "axios";
+import { CircularProgress, Box } from "@mui/material";
 
 // Create AuthContext
 export const AuthContext = createContext();
 
 // AuthProvider component
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Store user info
-  const [loading, setLoading] = useState(true); // Loading state
-  const [isLoggedOut,setIsLoggedOut] = useState(false)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isLoggedOut, setIsLoggedOut] = useState(false);
 
   // Fetch user info from the API
   const fetchUserInfo = async () => {
@@ -18,21 +18,20 @@ export const AuthProvider = ({ children }) => {
 
       if (response.data.success) {
         console.log("User Info", response.data);
-        setUser(response.data.user); // Store user info in state
-        setIsLoggedOut(false)
+        setUser(response.data.user);
+        setIsLoggedOut(false);
       } else {
-        setUser(null); // Clear user info if not authenticated
-        console.log("Is Logged Out")
-        setIsLoggedOut(true)
+        setUser(null);
+        console.log("Error while fetching user auth");
+        setIsLoggedOut(true);
       }
     } catch (error) {
       console.error("Error fetching user info:", error.message);
-      setUser(null); // Clear user info on error
-        setIsLoggedOut(true)
-        console.log("Is Logged Out")
-
+      setUser(null);
+      setIsLoggedOut(true);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false); // Set loading false only after request completes
   };
 
   // Run fetchUserInfo when the component mounts
@@ -41,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // Context value to provide
-  const value = { user, setUser, loading,isLoggedOut,setIsLoggedOut };
+  const value = { user, setUser, loading, isLoggedOut, setIsLoggedOut };
 
   return (
     <AuthContext.Provider value={value}>
